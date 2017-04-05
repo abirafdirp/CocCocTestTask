@@ -38,7 +38,8 @@ public:
 		{ '7', "seven" },
 		{ '8', "eight" },
 		{ '9', "nine" }
-	}), eleventhsLanguageMapping({
+	}), // specific for English
+		eleventhsLanguageMapping({
 		{ "10", "ten" },
 		{ "11", "eleven" },
 		{ "12", "twelve" },
@@ -61,7 +62,7 @@ public:
 		{ '9', "nine" }
 	}) {};
 protected:
-	std::string getPostfix(int lengthOfString, int index, char );
+	std::string getDecimalPlacePostfix(int index, std::string wholeNumber);
 	std::string getLiteral(char number, std::string decimalPlace);
 
 	// specific to English

@@ -17,21 +17,39 @@
 // So to support more languages, we need to define per-language implementation at corresponding functions.
 
 bool Parser::validateInputNumber(std::string inputNumber){
-	if (inputNumber.find_first_not_of("0123456789") != std::string::npos || (inputNumber.length() != 1 && inputNumber[0] == '0' || inputNumber.length() > 12)) {
+	if (inputNumber.find_first_not_of("0123456789") != std::string::npos || (inputNumber.length() != 1 && inputNumber[0] == '0') || inputNumber.length() > 12) {
 		return false;
 	}
 	return true;
 }
 
-std::string Parser::getPostfix(int lengthOfString, int index, char number){
+std::string Parser::getDecimalPlacePostfix(int index, std::string wholeNumber){
 	std::string postfix;
-	int indexFromRight = lengthOfString - index;
+	int indexFromRight = wholeNumber.length() - index, numbersLeftInGroup = (indexFromRight % 3 - 3) * -1;
+	char number = wholeNumber[index];
 
-	if (number == '0' && indexFromRight % 3 != 1) {
-		postfix = "";
+	// if the number is zero, the only time it will be added a postfix is when the number is at the last position in a group
+	// (a group consist of three numbers, counted from right) and if one of the other number in the group is not a zero.
+	if (number == '0' && indexFromRight % 3 == 1) {
+		bool hasNaturalNumber = false;
+		for (int i = index - 1; i >= (index - numbersLeftInGroup); i--){
+			if (i < 0) {
+				break;
+			}
+			if (wholeNumber[i] != '0') {
+				hasNaturalNumber = true;
+			}
+		}
+		if (hasNaturalNumber == false) {
+			return "";
+		}
 	}
+	else if (number == '0' && indexFromRight % 3 != 1){
+		return "";
+	}
+	
 	// exception number eight in English, only add 'y'
-	else if (number == '8' && postfix == "ty" && this->language == this->EN_LANGUAGE) {
+	if (number == '8' && postfix == "ty" && this->language == this->EN_LANGUAGE) {
 		postfix = "y";
 	}
 	else if (indexFromRight % 3 == 2) {
@@ -110,6 +128,7 @@ std::string Parser::generateTextRepresentation(std::string inputNumber){
 	for (int i = 0; i < inputNumberLength; i++){
 		currentNumber = inputNumber[i];
 
+		// for elevenths implementation
 		if (i != inputNumberLength - 1) {
 			hasNextNumber = true;
 			nextNumber = inputNumber[i + 1];
@@ -127,16 +146,19 @@ std::string Parser::generateTextRepresentation(std::string inputNumber){
 			numberLiteral = this->getEleventhLiteral(eleventhNumber);
 
 			i++;
-			postfix = this->getPostfix(inputNumberLength, i, currentNumber);
+			postfix = this->getDecimalPlacePostfix(i, inputNumber);
 		}
 		else {
 			numberLiteral = Parser::getLiteral(currentNumber, decimalPlace);
-			postfix = this->getPostfix(inputNumberLength, i, currentNumber);
+			postfix = this->getDecimalPlacePostfix(i, inputNumber);
 		}
 		output = output + numberLiteral + postfix + " ";
 		
 	};
 
+	// For quick solution, I just remove all double whitespaces.
+	// This can happen when e.g. a zero text has a postfix that has a space in front of them e.g. " hundreds".
+	// This will also opens up flexibility in postfix i.e. using spaces in postfix.
 	std::string::iterator new_end = std::unique(output.begin(), output.end(), BothAreSpaces);
 	output.erase(new_end, output.end());
 
