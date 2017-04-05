@@ -48,12 +48,14 @@ std::string Parser::getDecimalPlacePostfix(int index, std::string wholeNumber){
 		return "";
 	}
 	
-	// exception number eight in English, only add 'y'
-	if (number == '8' && postfix == "ty" && this->language == this->EN_LANGUAGE) {
-		postfix = "y";
-	}
-	else if (indexFromRight % 3 == 2) {
-		postfix = decimalPlacePostfixLanguageMapping.at("tenths");
+	if (indexFromRight % 3 == 2) {
+		// exception number eight in English, only add 'y'
+		if (number == '8'  && this->language == this->EN_LANGUAGE) {
+			postfix = "y";
+		}
+		else{
+			postfix = decimalPlacePostfixLanguageMapping.at("tenths");
+		}
 	}
 	else if (indexFromRight % 3 == 0) {
 		postfix = decimalPlacePostfixLanguageMapping.at("hundreds");
